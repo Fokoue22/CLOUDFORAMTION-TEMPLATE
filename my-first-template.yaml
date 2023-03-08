@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A simple EC2 instance launched in a default vpc with cloudformation
+Resources:  
+  Homework1ec2instance:  # this is the logical id of our ec2 instance and it should be unique  
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: "ami-0f5e8a042c8bfcd5e" # us-west-1 region 
+      InstanceType: "t2.micro" 
+      KeyName: "my-first-keypair"
+      AvailabilityZone: "us-west-1b"
+      Tags: 
+        - Key: "Name"
+          Value: "Fokoue-ec2-instance"

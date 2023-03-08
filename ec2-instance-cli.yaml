@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A simple EC2 instance launched via a cli
+Resources:  
+  Homework2ec2instanceviacli:    
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: "ami-0b0dcb5067f052a63" 
+      InstanceType: "t2.micro" 
+      KeyName: "new-2022"
+      AvailabilityZone: "us-east-1b"
+      SubnetId: "	subnet-09056e0d87f2a2f58"
+      Tags: 
+        - Key: "Name"
+          Value: "Fokoue-ec2-instance-cli"
