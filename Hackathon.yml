@@ -1,0 +1,148 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  This is a broken template - Please fix it to get your unsecured 
+  highly available apache website to work.
+  This DevOps Hackathon template will create ELB Security Group, ELB, ELB Listener, 
+  Target Group, Launch Configuration and Autoscaling group.
+Parameters:
+  CustomVPC:
+    Description: Select One VPC available in your existing account
+    Type: AWS::EC2::VPC::Id
+  PublicSubnets:
+    Type: 'List<AWS::EC2::Subnet::Id>'
+    Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
+    ConstraintDescription: >-
+      must be a list of at least two existing subnets associated with at least
+      two different availability zones. They should be residing in the selected
+      Virtual Private Cloud.
+  InstanceType:
+    Description: WebServer EC2 instance type (has default, AllowedValues)
+    Type: String
+    Default: t3.micro  # change this instance type to be t3.micro
+    AllowedValues:
+      - t3.micro
+      - t2.nano
+      - t2.small
+
+Mappings: 
+  RegionMap: 
+    us-east-1: # Testing only
+      HVM64: ami-0aa7d40eeae50c9a9 # ami-067d1e60475437da2
+    us-west-1:
+      HVM64: ami-0bdb828fd58c52235
+    us-east-2:
+      HVM64: ami-047bb4163c506cd98
+    us-west-2:
+      HVM64: aami-06e85d4c3149db26a
+    eu-west-3:
+      HVM64: ami-08569b978cc4dfa10
+Resources: 
+  ELBTargetGroup:
+    Type: AWS::ElasticLoadBalancing::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 6
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref CustomVPC
+      TargetType: instance
+  ELBSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupName: "ELBTraffic"
+        GroupDescription: "Enable HTTP access on the inbound port for ELB"
+        VpcId: !Ref CustomVPC
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            CidrIp: 0.0.0.0/0 # change this cidr block 10.0.0.0/0
+      #Tags:
+        #- Key: Name
+         # Value: ELBSecurityGroup
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "DBTraffic"
+      GroupDescription: "Enable HTTP access on the inbound port for DB"
+      VpcId: !Ref CustomVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80  # change this to listen to http
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      #Tags:
+       # - Key: Name
+        #  Value: DBSecurityGroup
+  ElasticLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      Subnets: !Ref PublicSubnets
+      SecurityGroups:
+        - !Ref ELBSecurityGroup   #this the load balancer security group to ELB
+  ElbListener:
+    Type: AWS::ElasticLoadBalancing::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ELBTargetGroup
+      LoadBalancerArn: !Ref ElasticLoadBalancer
+      Port: '80'  # change to port 80 
+      Protocol: HTTP # change the https to http to meet the requirment of the client 
+  AsgConfig:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      SecurityGroups:
+      - !Ref ELBSecurityGroup # this to elb security group 
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64] # change the mapping key to 64 
+      SubnetId: "subnet-05b60648b2c912c12" # add a subnet id for the ec2 instance
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo "<html><body><h1>Welcome to DevOps Hackathon ${AWS::Region}<h1></body></html>" > /var/www/html/index.html
+  AsgGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn:
+      - ELBTargetGroup
+      - ElasticLoadBalancer
+    Properties:
+      PropagateAtLaunch: 'true'
+      VPCZoneIdentifier: !Ref PublicSubnets
+      LaunchConfigurationName: !Ref AsgConfig
+      MinSize: '2' #the minimume should be atleast 2 for highly available
+      MaxSize: '4'
+      HealthCheckGracePeriod: 300
+      MaxInstanceLifetime: 2592000
+      TargetGroupARNs:
+        - !Ref ELBTargetGroup
+
+Outputs:
+  outputELBDNSName:
+    Description: DNS name of the application
+    Value: !GetAtt ElasticLoadBalancer.DNSName
+  outputELBTargetGroup:
+    Description: A reference to the created Target Group
+    Value: !Ref ELBTargetGroup
+  outputELBSecurityGroup:
+    Description: A reference to the created Security Group
+    Value: !Ref ELBSecurityGroup
+  outputElasticLoadBalancer:
+    Description: A reference to the created Elastic Load Balancer
+    Value: !Ref ElasticLoadBalancer
+  outputElasticListener:
+    Description: A reference to the created Elastic Load Balancer Listener
+    Value: !Ref ElbListener
+  outputAsgConfig: 
+    Description: Id for autoscaling launch configuration
+    Value: !Ref AsgConfig
+  outputAsgGroup: 
+    Description: Id for autoscaling group
+    Value: !Ref AsgGroup
