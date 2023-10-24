@@ -1,12 +1,12 @@
 # A CodeBuild and CodePipeline template for Containerized Application
 
-This template creates a custom CodePipeline pipeline for continuous integration and continuous delivery, for *two environments* named `staging` and `production`.
+This template creates a custom CodePipeline for continuous integration and continuous delivery, for *two environments* named `staging` and `production`.
 
 ## Steps
 
 1. Retrieve source: fetches the latest version of a branch from a CodeCommit repository.
-2. Build staging: builds the project using CodeBuild by executing the `buildspec.yml` file.
-3. Deploy staging: deploys the output of step 2 using CodeBuild by executing the `deployspec.yml` file.
+2. Build staging: builds the project using CodeBuild by executing the `buildspec.yml`(still to be push)  file.
+3. Deploy staging: deploys the output of step 2 using CodeBuild by executing the `deployspec.yml`(still to be push) file.
 4. Manual approval.
 5. Build production: builds the project using CodeBuild by executing the `buildspec.yml` file.
 6. Deploy production: deploys the output of step 5 using CodeBuild by executing the `deployspec.yml` file.
