@@ -20,7 +20,7 @@ Parameters:
     Description: New account password
     MinLength: '1'
     MaxLength: '41'
-    ConstraintDescription: the password must be between 1 and 41 characters
+    ConstraintDescription: the password must be between 1 and 41. Alphanumeric characters plus hyphens (-) and underscores (_)
 Resources:
   CFNUser:
     Type: AWS::IAM::User
