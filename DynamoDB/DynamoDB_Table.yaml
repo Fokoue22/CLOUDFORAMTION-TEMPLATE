@@ -85,3 +85,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref 'ReadCapacityUnits'
         WriteCapacityUnits: !Ref 'WriteCapacityUnits'
+Outputs:
+  TableName:
+    Value: !Ref 'myDynamoDBTable'
+    Description: Table name of the newly created DynamoDB table
