@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Metadata:
-  License: Apache-2.0
+  License: FOKOUE THOMAS
 Description: 'AWS CloudFormation Sample Template AutoScalingMultiAZWithNotifications:
   Create a multi-az, load balanced and Auto Scaled sample web site running on an Apache
   Web Server. The application is configured to span all Availability Zones in the
