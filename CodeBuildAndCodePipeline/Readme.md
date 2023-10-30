@@ -14,3 +14,12 @@ This template must be deployed first as the cloudformation-codepipeline-template
  - App-build CodeBuild project for running scripts and commands to build the application
  - App-deploy CodeBuild Project for running scripts and commands to deploy the application
  - Required IAM roles for the codebuild to create logs in cloudwatch and s3, create objects in s3, and create reports
+
+## fullcd-codepipeline-template.yml
+
+This template deploys the pipeline which is triggered on a commit to main. It has 3 stages
+
+1. app-build stage - executes the app-build CodeBuild job
+2. Manual approval stage - requires manual approval
+3. app-deploy stage - executes the app-deploy CodeBuild job
+
