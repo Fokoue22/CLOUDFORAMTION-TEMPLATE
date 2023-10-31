@@ -1,0 +1,71 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: CodePipeline for continuous integration build and continuous deployment
+
+Parameters:
+  CodeBuildStack:
+    Type: String
+    Description: Name of the code build stack which should have been deployed before this stack
+
+Resources:
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [codepipeline.amazonaws.com]
+            Action: ["sts:AssumeRole"]
+      Policies:
+        - PolicyName: CanAccessCodeCommit
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codecommit:GetBranch
+                  - codecommit:GetCommit
+                  - codecommit:UploadArchive
+                  - codecommit:GetUploadArchiveStatus
+                Resource:
+                  - Fn::ImportValue: !Sub "${CodeBuildStack}-CodeCommitArn"
+                  # - !Sub "arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${RepositoryName}/*"
+        - PolicyName: CanAccessS3
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+                  - s3:PutObject
+                  - s3:GetBucketPolicy
+                  - s3:GetObjectAcl
+                  - s3:PutObjectAcl
+                  - s3:DeleteObject
+                Resource:
+                  - Fn::ImportValue: !Sub "${CodeBuildStack}-PipelineS3BucketArn"
+                  - !Sub
+                    - "${filename}/*"
+                    - filename:
+                        Fn::ImportValue: !Sub "${CodeBuildStack}-PipelineS3BucketArn"
+        - PolicyName: CanStartCodeBuild
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource:
+                  - Fn::ImportValue: !Sub "${CodeBuildStack}-AppBuildArn"
+                  - Fn::ImportValue: !Sub "${CodeBuildStack}-AppDeployArn"
+
+  
