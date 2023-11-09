@@ -68,4 +68,70 @@ Resources:
                   - Fn::ImportValue: !Sub "${CodeBuildStack}-AppBuildArn"
                   - Fn::ImportValue: !Sub "${CodeBuildStack}-AppDeployArn"
 
-  
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Sub "${AWS::StackName}-Code-Pipeline"
+      ArtifactStore:
+        Type: S3
+        Location:
+          Fn::ImportValue: !Sub "${CodeBuildStack}-PipelineS3Bucket"
+      RestartExecutionOnUpdate: false
+      RoleArn: !GetAtt PipelineRole.Arn
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeCommit
+                Version: 1
+              Configuration:
+                RepositoryName: 
+                  Fn::ImportValue: !Sub "${CodeBuildStack}-CodeCommitName"
+                BranchName: main
+              OutputArtifacts:
+                - Name: Source
+        - Name: Build-AppBuild
+          Actions:
+            - Name: App-Build
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName:
+                  Fn::ImportValue: !Sub "${CodeBuildStack}-AppBuild"
+              InputArtifacts:
+                - Name: Source
+              OutputArtifacts:
+                - Name: FullZip
+              RunOrder: 1
+        - Name: Deploy-App
+          Actions:
+            - Name: Approval
+              ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Provider: Manual
+                Version: 1
+              Configuration:
+                CustomData: Review the build output and approve to deploy
+              RunOrder: 2
+            - Name: App-Deploy
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName:
+                  Fn::ImportValue: !Sub "${CodeBuildStack}-AppDeploy"
+                PrimarySource: Source
+                EnvironmentVariables: '[{"name":"ENVIRONMENT","value":"SampleEnv","type":"PLAINTEXT"}]'
+              InputArtifacts:
+                - Name: Source
+                - Name: FullZip
+              RunOrder: 3
