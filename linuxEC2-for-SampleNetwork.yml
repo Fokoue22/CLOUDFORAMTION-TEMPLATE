@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A simple EC2 instance launched in a VPC with cloudformation
+
+
+Resources:  
+  Myec2instance:    
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: "ami-0e731c8a588258d0d" 
+      InstanceType: "t2.micro"
+      KeyName: "jan2023-keypair"
+      IamInstanceProfile: may2022-ssm-role # this line will add an iam role to our ec2 
+      SecurityGroupIds: # here we are going to import the security group from the SampleNetwork tamplate
+        - !ImportValue 
+            SampleNetworkCrossStack-SecurityGroupID
+      SubnetId: # same thing here we import our subnetId 
+          !ImportValue 'SampleNetworkCrossStack-SubnetID'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo "<html><body><h1>My First WebPage by Fokoue Thomas ${AWS::Region}</h1></body></html>" > /var/www/html/index.html
+      Tags: 
+        - Key: Name
+          Value: ec2-instance-CrossStack
+  
+  MyEIP: # we need to allocate and ELastic Ip address
+    Type: AWS::EC2::EIP 
+    Properties:
+      InstanceId: !Ref Myec2instance
+
+Outputs:
+  InstanceId: 
+    Description: InstanceId of the newly created EC2 instance
+    Value: !GetAtt Myec2instance.PublicIp 
+
+  PrivateDnsName:
+    Description: Display the DNS name of the EC2 instance
+    Value: !GetAtt Myec2instance.PrivateDnsName
+    Export:
+     Name: !Sub '${AWS::StackName}-Myec2instance1'
+
+  PublicDnsName:
+    Description: Display the public DNS Name of the ec2 intance
+    Value: !GetAtt Myec2instance.PublicDnsName
+    Export:
+     Name: !Sub '${AWS::StackName}-Myec2instance2'

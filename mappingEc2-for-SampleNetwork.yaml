@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  This tamplate will use the Samplenetwork to display a new
+  stack using Cross stack reference.  
+
+
+Parameters: 
+ InstanceType:
+    Description: Webserever EC2 instance 
+    Type: String
+    AllowedValues: #This is a list and you will be ask to chose between all this instanceType
+      - t2.large
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.xlarge
+      - t2.2xlarge
+      - t2.medium
+
+ KeyName:
+    Description: Webserever EC2 instance 
+    Type: AWS::EC2::KeyPair::KeyName #this function will pull all the keys you have in this region 
+    ConstraintDescription: It must be the name of any existing keypair
+
+ CrossStackName:
+    Description: The name of the imported network stack # any stack name can be imported at this level if you remove the default.
+    Type: String
+    Default: SampleNetworkCrossStack 
+
+Mappings:
+ RegionMap: # Name of the mapping 
+   us-west-1: # Top level key
+    "HVM64": "ami-073e64e4c237c08ad" # N.Califonia second level key 
+   us-west-2:
+    "HVM64": "ami-0ccea833bf267252a" # Oregon
+   us-east-1:
+    "HVM64": "ami-04cb4ca688797756f" # N.Viginaia
+   us-east-2:
+    "HVM64": "ami-01103fb68b3569475" # Ohio
+  
+
+Resources:  
+ Myec2instance:    
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId:  !FindInMap [RegionMap, !Ref AWS::Region, "HVM64"]    # [MapName, toplevel key(Best to use a sudo parameter), secondlevelkey]
+      InstanceType: !Ref InstanceType #This will import the instance type from the parameter
+      KeyName: !Ref KeyName 
+      SecurityGroupIds: # here we are going to import the security group from the SampleNetwork tamplate
+        - !ImportValue 
+            SampleNetworkCrossStack-SecurityGroupID
+      SubnetId: # same thing here we import our subnetId 
+          !ImportValue 'SampleNetworkCrossStack-SubnetID'
+      AvailaibilityZone: "us-west-2a"
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo "<html><body><h1>My First WebPage by Fokoue Thomas ${AWS::Region}<h1></body></html>" > /var/www/html/index.html
+      Tags: 
+        - Key: Name
+          Value: ec2-instance-CrossStack
+
+
+ MyEIP: # we need to allocate and ELastic Ip address using resource
+    Type: AWS::EC2::EIP 
+    Properties:
+      InstanceId: !Ref Myec2instance
+
+Outputs:
+  InstanceId: 
+    Description: InstanceId of the newly created EC2 instance
+    Value: !GetAtt Myec2instance.PublicIp 
+
+  PrivateDnsName:
+    Description: Display the DNS name of the EC2 instance
+    Value: !GetAtt Myec2instance.PrivateDnsName
+    Export:
+     Name: !Sub '${AWS::StackName}-Myec2instance1'
+
+  PublicDnsName:
+    Description: Display the public DNS Name of the ec2 intance
+    Value: !GetAtt Myec2instance.PublicDnsName
+    Export:
+     Name: !Sub '${AWS::StackName}-Myec2instance2'
