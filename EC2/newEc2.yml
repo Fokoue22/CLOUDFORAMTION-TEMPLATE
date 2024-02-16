@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Part 1 - Build a webapp stack with CloudFormation
+
+Resources:
+  WebAppInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: "ami-03a6eaae9938c858c"
+      InstanceType: "t2.micro"
+      KeyName: "ec2-keypair"
+      SubnetId: "subnet-000fbc43f773a1d24"
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo "<html><body><h1>My First WebPage by Fokoue Thomas <h1></body></html>" > /var/www/html/index.html
+      Tags: 
+        - Key: "Name"
+          Value: "Durant"
+
+  MyEIP: # we need to allocate and ELastic Ip address using resource
+    Type: AWS::EC2::EIP 
+    Properties:
+      InstanceId: !Ref WebAppInstance
