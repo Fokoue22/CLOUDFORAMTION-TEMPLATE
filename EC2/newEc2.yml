@@ -5,9 +5,10 @@ Resources:
   WebAppInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: "ami-03a6eaae9938c858c"
+      ImageId: "ami-0e731c8a588258d0d"
       InstanceType: "t2.micro"
-      KeyName: "ec2-keypair"
+      IamInstanceProfile: may2022-ssm-role
+      KeyName: "jan2023-keypair"
       SubnetId: "subnet-000fbc43f773a1d24"
       UserData:
         Fn::Base64: !Sub |
