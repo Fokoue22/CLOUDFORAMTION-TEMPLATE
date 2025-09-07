@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
-  This tamplate will use the Samplenetwork to display a new
+  This tamplate will use the Sample network to display a new
   stack using Cross stack reference.  
 
 
@@ -32,7 +32,7 @@ Mappings:
    us-west-1: # Top level key
     "HVM64": "ami-073e64e4c237c08ad" # N.Califonia second level key 
    us-west-2:
-    "HVM64": "ami-0ccea833bf267252a" # Oregon
+    "HVM64": "ami-07c5ecd8498c59db5" # Oregon
    us-east-1:
     "HVM64": "ami-04cb4ca688797756f" # N.Viginaia
    us-east-2:
@@ -51,7 +51,6 @@ Resources:
             SampleNetworkCrossStack-SecurityGroupID
       SubnetId: # same thing here we import our subnetId 
           !ImportValue 'SampleNetworkCrossStack-SubnetID'
-      AvailaibilityZone: "us-west-2a"
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
