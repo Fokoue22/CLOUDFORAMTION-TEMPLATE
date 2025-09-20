@@ -1,42 +1,28 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   AWS CloudFormation Sample Template VPC_with_PublicIPs_And_DNS: Sample template
   that creates a VPC with DNS and public IPs enabled. Note that you are billed
   for the AWS resources that you use when you create a stack from this template.
 
 Resources:
-  VPC: 
+  VPC:
     Type: 'AWS::EC2::VPC'
     Properties:
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       CidrBlock: 10.0.0.0/16
-      Tags: 
-        - Key: Name
-          Value: SampleNetwork-VPC
-
-  PublicSubnet:  
+  PublicSubnet:
     Type: 'AWS::EC2::Subnet'
     Properties:
-      VpcId: !Ref VPC 
+      VpcId: !Ref VPC
       CidrBlock: 10.0.0.0/24
-      Tags: 
-        - Key: Name
-          Value: PublicSubnet-sample
-
   InternetGateway:
     Type: 'AWS::EC2::InternetGateway'
-    Properties:
-      Tags: 
-        - Key: Name
-          Value: InternetGateway-Sample
   VPCGatewayAttachment:
     Type: 'AWS::EC2::VPCGatewayAttachment'
     Properties:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
-    
-
   PublicRouteTable:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -70,9 +56,6 @@ Resources:
           FromPort: '80'
           ToPort: '80'
           CidrIp: 0.0.0.0/0
-      Tags: 
-        - Key: Name
-          Value: websecurity-sample
 
 Outputs:
   VPCId:

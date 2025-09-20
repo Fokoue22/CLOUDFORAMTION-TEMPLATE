@@ -30,13 +30,13 @@ Parameters:
 Mappings:
  RegionMap: # Name of the mapping 
    us-west-1: # Top level key
-    "HVM64": "ami-073e64e4c237c08ad" # N.Califonia second level key 
+    "HVM64": "ami-00142eb1747a493d9" # N.Califonia second level key 
    us-west-2:
-    "HVM64": "ami-07c5ecd8498c59db5" # Oregon
+    "HVM64": "ami-0a94a1259c5779e00" # Oregon
    us-east-1:
-    "HVM64": "ami-04cb4ca688797756f" # N.Viginaia
+    "HVM64": "ami-0b09ffb6d8b58ca91" # N.Viginaia
    us-east-2:
-    "HVM64": "ami-01103fb68b3569475" # Ohio
+    "HVM64": "ami-0ca4d5db4872d0c28" # Ohio
   
 
 Resources:  
@@ -49,8 +49,8 @@ Resources:
       SecurityGroupIds: # here we are going to import the security group from the SampleNetwork tamplate
         - !ImportValue 
             SampleNetworkCrossStack-SecurityGroupID
-      SubnetId: # same thing here we import our subnetId 
-          !ImportValue 'SampleNetworkCrossStack-SubnetID'
+      SubnetId: !ImportValue
+        Fn::Sub: "${SampleNetworkCrossStack-SubnetID}-SubnetID"
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash

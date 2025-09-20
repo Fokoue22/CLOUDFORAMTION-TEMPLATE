@@ -31,7 +31,7 @@ Resources:
       ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyName  # References the KeyName parameter
-      SecurityGroupIds: # here we are going to import the security group from the SampleNetwork tamplate
+      SecurityGroupIds: # here we are going to import the security group from the SampleNetwork tamplate and sg is a list     
         - !ImportValue 
             SampleNetworkCrossStack-SecurityGroupID
       SubnetId: # same thing here we import our subnetId 

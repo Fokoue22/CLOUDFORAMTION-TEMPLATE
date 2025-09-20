@@ -36,7 +36,7 @@ Mappings:
    us-east-1:
     "HVM64": "ami-04cb4ca688797756f" # N.Viginaia
    us-east-2:
-    "HVM64": "ami-01103fb68b3569475" # Ohio
+    "HVM64": "ami-0ca4d5db4872d0c28" # Ohio
   
 
 Resources:  
@@ -51,7 +51,7 @@ Resources:
             SampleNetworkCrossStack-SecurityGroupID
       SubnetId: # same thing here we import our subnetId 
           !ImportValue 'SampleNetworkCrossStack-SubnetID'
-      AvailaibilityZone: "us-west-2a"
+          
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -62,7 +62,7 @@ Resources:
           echo "<html><body><h1>My First WebPage by Fokoue Thomas ${AWS::Region}<h1></body></html>" > /var/www/html/index.html
       Tags: 
         - Key: Name
-          Value: ec2-instance-CrossStack
+          Value: ec2-instance-CrossStack 
 
 
  MyEIP: # we need to allocate and ELastic Ip address using resource
