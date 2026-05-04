@@ -27,7 +27,7 @@
     Mappings: 
       RegionMap: 
         us-east-1: # Testing only
-          HVM64: ami-067d1e60475437da2 #choose free tier AMI of your region
+          HVM64: ami-0bb4c991fa89d4b9b #choose free tier AMI of your region
         us-west-1:
           HVM64: ami-0bdb828fd58c52235
         us-east-2:
