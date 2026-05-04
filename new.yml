@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  this template will be use to create and ec2 instance using cross stack reference 
+# Resources section
+Parameters:
+  InstanceTypeParameter:
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+
+      
+  PublicSubnetId:
+    Description: ID of an existing public subnet within the specified VPC.
+    Type: 'AWS::EC2::Subnet::Id'
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance.
+    Type: 'AWS::EC2::KeyPair::KeyName' 
+  AMIId:
+    Description: Name of a Parameter Store parameter that stores the ID of the Amazon Machine Image (AMI).
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+
+
+
+
+
+Resources:
+  MyEC2Instance: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      # Linux AMI
+      ImageId: ami-1234567890abcdef0 
+      InstanceType: t2.micro
+      KeyName: MyKey
+      BlockDeviceMappings:
+        - DeviceName: /dev/sdm
+          Ebs:
+            VolumeType: io1
+            Iops: 200
+            DeleteOnTermination: false
+            VolumeSize: 20
